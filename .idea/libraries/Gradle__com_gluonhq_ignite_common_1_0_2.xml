@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.gluonhq:ignite-common:1.0.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq/ignite-common/1.0.2/be69e7d89ee762cd7ccc38b35eb307bef6497697/ignite-common-1.0.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq/ignite-common/1.0.2/d22d4eec75da633ff900ac37fa9a1618dc8bcd5c/ignite-common-1.0.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq/ignite-common/1.0.2/e8071d7c1cf1f9d85086d7ec43d6ad3f509c44d7/ignite-common-1.0.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

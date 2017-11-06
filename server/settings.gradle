@@ -1,0 +1,5 @@
+include 'main_project'
+include 'library_project'
+
+rootProject.name = 'server'
+

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.gluonhq:ignite-dagger:1.0.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq/ignite-dagger/1.0.2/b7850b1b38268ef868679a65c983c75b03ca637f/ignite-dagger-1.0.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq/ignite-dagger/1.0.2/c15d229b831009da542593a166e0164e31faa55a/ignite-dagger-1.0.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.gluonhq/ignite-dagger/1.0.2/5ea0c068eff2bc922ba4fb687504e9ce5c954cc/ignite-dagger-1.0.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
