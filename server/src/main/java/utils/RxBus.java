@@ -1,7 +1,8 @@
 package utils;
 
-import data.ClientServerState;
-import data.DeviceServerState;
+import data.model.ClientServerState;
+import data.model.ConnectionState;
+import data.model.DeviceServerState;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
@@ -17,7 +18,11 @@ public class RxBus {
     private BehaviorSubject<DeviceThread> subjectDeviceState = BehaviorSubject.create();
     private BehaviorSubject<ClientServerState> subjectClientServerState = BehaviorSubject.create();
 
-//    private BehaviorSubject<ObservableList<Device>> subjectDeviceList = BehaviorSubject.create();
+    private PublishSubject<ConnectionState> subjectConnectionState = PublishSubject.create();
+    private PublishSubject<String> subjectStateClient = PublishSubject.create();
+
+
+    //    private BehaviorSubject<ObservableList<Device>> subjectDeviceList = BehaviorSubject.create();
 //
     public static RxBus instanceOf() {
         if (instance == null) {
@@ -53,7 +58,15 @@ public class RxBus {
         return subjectDeviceState;
     }
 
-//
+    public PublishSubject<ConnectionState> getSubjectConnectionState() {
+        return subjectConnectionState;
+    }
+
+    public void setSubjectConnectionState(PublishSubject<ConnectionState> subjectConnectionState) {
+        this.subjectConnectionState = subjectConnectionState;
+    }
+
+    //
 //    public void setDeviceList(ObservableList<Device> object) {
 //        subjectDeviceList.onNext(object);
 //    }

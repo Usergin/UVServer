@@ -1,8 +1,6 @@
 package gui.control_panel;
 
 import business.control_panel.ControlPanelInteractor;
-import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
-import io.reactivex.schedulers.Schedulers;
 import utils.RxBus;
 
 public class ControlPanelPresenterImpl implements ControlPanelPresenter {
@@ -16,20 +14,35 @@ public class ControlPanelPresenterImpl implements ControlPanelPresenter {
     @Override
     public void setControlPanelView(ControlPanelView controlPanelView) {
         this.controlPanelView = controlPanelView;
+        RxBus.instanceOf().getDeviceServerState()
+                .subscribe(deviceServerState -> {
+                    controlPanelView.showSnackBar(deviceServerState.getIp());
+                });
+        RxBus.instanceOf().getClientServerState()
+                .subscribe(clientServerState -> {
+                    controlPanelView.showSnackBar(clientServerState.getIp());
+                });
+        RxBus.instanceOf().getSubjectConnectionState()
+                .subscribe(connectionStateConsumer -> {
+                    controlPanelView.showSnackBar(connectionStateConsumer.getIp() + connectionStateConsumer.isState());
+                });
     }
+
 
     @Override
     public void setOnDeviceServer(boolean val) {
-        RxBus.instanceOf().getDeviceServerState().subscribe(deviceServerState -> {
-            controlPanelView.showSnackBar(deviceServerState.getIp());
-        }) ;
         if (val)
             controlPanelInteractor.startDeviceServer();
+        else
+            controlPanelInteractor.stopDeviceServer();
 
     }
 
     @Override
-    public void setOnUserServer(boolean val) {
-
+    public void setOnClientServer(boolean val) {
+        if (val)
+            controlPanelInteractor.startClientServer();
+        else
+            controlPanelInteractor.stopClientServer();
     }
 }

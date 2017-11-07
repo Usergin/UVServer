@@ -1,13 +1,11 @@
-package data;
+package data.model;
 
-public class ServerState {
+public class State {
     private String ip;
-    private int port;
-    private boolean state;
+     private boolean state;
 
-    public ServerState(String ip, int port, boolean state) {
+    public State(String ip, boolean state) {
         this.ip = ip;
-        this.port = port;
         this.state = state;
     }
 
@@ -17,14 +15,6 @@ public class ServerState {
 
     public void setIp(String ip) {
         this.ip = ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 
     public boolean isState() {

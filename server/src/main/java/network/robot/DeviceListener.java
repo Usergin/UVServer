@@ -4,11 +4,11 @@ package network.robot;
 public interface DeviceListener {
 	/****** События *******/
 	 
-    // Сервер запустился
-    void serverForDeviceStarted(String ip, int port);
- 
-    // Сервер прекратил работу
-    void serverForDeviceStopped();
+//    // Сервер запустился
+//    void serverForDeviceStarted(String ip, int port);
+//
+//    // Сервер прекратил работу
+//    void serverForDeviceStopped();
  
     // Подключился новый пользователь
     void onDeviceConnected(DeviceThread device);

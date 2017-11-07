@@ -1,6 +1,5 @@
 package gui.control_panel;
 
-import business.control_panel.ControlPanelInteractorImpl;
 import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.controls.JFXToggleButton;
 import com.jfoenix.controls.JFXTreeTableView;
@@ -17,14 +16,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.swing.*;
 import java.util.Arrays;
 
 @ViewController(value = "/fxml/control_panel.fxml")
@@ -96,7 +93,7 @@ public class ControlPanelController implements ControlPanelView {
         System.out.println("event " + btnStateServer.isSelected());
         if(btnStateServer.isSelected()) {
             controlPanelPresenter.setOnDeviceServer(true);
-            controlPanelPresenter.setOnUserServer(true);
+            controlPanelPresenter.setOnClientServer(true);
         }
 //        controlPanelPresenter.onAuthentication(new Authentication(username.get(), getHashedValue(password.get())));
     }

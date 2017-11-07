@@ -1,4 +1,4 @@
-package network.client;
+package network;
 
 public class ResponseParser {
     int type;

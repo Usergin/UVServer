@@ -1,13 +1,16 @@
 package network.client;
 
 
+import data.model.ClientServerState;
 import network.robot.DeviceListener;
 import network.robot.DeviceObserverThreadServer;
 import network.robot.DeviceThread;
 import utils.AppConstants;
+import utils.RxBus;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -17,51 +20,45 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
 
     // The server socket.
     private static ServerSocket serverSocket = null;
-    // The client socket.
-    private static Socket clientSocket = null;
-    protected static boolean isStopped = false;
+    private static boolean isStopped = false;
     // Обьект синхронизации доступа
     private final Object lock = new Object();
-    private DeviceObserverThreadServer multiDeviceServer;
-    // Хранит онлайн пользователей чата
-    public static LinkedList<ClientThread> clientlist = new LinkedList<ClientThread>();
-
+    // Хранит список пользователей
+    private static LinkedList<ClientThread> clientList = new LinkedList<ClientThread>();
     // Хранит слушателей сервера
     private static LinkedList<ClientListener> listenerList = new LinkedList<ClientListener>();
     // This chat server can accept up to maxClientsCount clients' connections.
-
     private static final int maxClientsCount = 10;
     private static final ClientThread[] threads = new ClientThread[maxClientsCount];
 
-    public void connect() {
+    private void connect() {
         /*
 		 * Open a server socket on the portNumber (default 2222). Note that we
 		 * can not choose a port less than 1023 if we are not privileged users
 		 * (root).
 		 */
         try {
-            callDeviceObserverServer();
-
+//          callDeviceObserverServer();
             serverSocket = new ServerSocket(AppConstants.TYPE_CLIENT_PORT);
             System.out.println("Waiting for a client...");
-            String ip = serverSocket.getInetAddress().getLocalHost()
+            String ip = InetAddress.getLocalHost()
                     .getHostAddress();
             // Нотификация события: сервер запущен
-            serverForClientStarted(ip, AppConstants.TYPE_CLIENT_PORT);
+            RxBus.instanceOf().setClientServerState
+                    (new ClientServerState(ip, AppConstants.TYPE_CLIENT_PORT, true));
+//            serverForClientStarted(ip, AppConstants.TYPE_CLIENT_PORT);
 
         } catch (IOException e) {
             System.out.println(e);
             serverForClientStopped();
-
         }
-
 		/*
 		 * Create a client socket for each connection and pass it to a new
 		 * client thread.
 		 */
         while (!isStopped) {
             try {
-                clientSocket = serverSocket.accept();
+                Socket clientSocket = serverSocket.accept();
                 System.out.println("Got a client :)");
 
                 int i = 0;
@@ -90,6 +87,13 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
         connect();
     }
 
+    public static LinkedList<ClientThread> getClientList() {
+        return clientList;
+    }
+
+    public static void setClientList(LinkedList<ClientThread> clientList) {
+        ClientObserverThreadServer.clientList = clientList;
+    }
     public synchronized static boolean isStopped() {
         return isStopped;
     }
@@ -113,13 +117,14 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
     // ***************** отправка сообщения всем пользователям ****************/
     // sender - отправитель
 
-    public void sendClientMessage(ClientThread sender, String message) {
+    void sendClientMessage(ClientThread sender, String message) {
         synchronized (lock) {
-            for (ClientThread user : clientlist) {
+            for (ClientThread user : clientList) {
                 try {
-                    user.out.writeUTF(message);
-                    user.out.flush();
+                    user.getOut().writeUTF(message);
+                    user.getOut().flush();
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
         }
@@ -185,22 +190,11 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
     }
 
     public void callDeviceObserverServer() {
-        multiDeviceServer = new DeviceObserverThreadServer();
+        DeviceObserverThreadServer multiDeviceServer = new DeviceObserverThreadServer();
         multiDeviceServer.addListener(this);
 
     }
 
-    @Override
-    public void serverForDeviceStarted(String ip, int port) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void serverForDeviceStopped() {
-        // TODO Auto-generated method stub
-
-    }
 
     @Override
     public void onDeviceConnected(DeviceThread device) {

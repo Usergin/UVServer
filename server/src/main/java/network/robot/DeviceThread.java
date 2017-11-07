@@ -14,17 +14,16 @@ public class DeviceThread extends Thread {
 	private Socket clientSocket = null;
 	private final DeviceThread[] threads;
 	private int maxClientsCount;
-	private String status;
 	private DeviceObserverThreadServer multiDeviceServer;
 	private InputStream sin;
 	private OutputStream sout;
 	// IP пользователя
-	public String userIp = "";
-	public DataInputStream in = null;
-	public DataOutputStream out = null;
+	private String deviceIp = "";
+	private DataInputStream inputStream = null;
+	private DataOutputStream outputStream = null;
 	private ClientObserverThreadServer multiClientThread;
 
-	public DeviceThread(Socket clientSocket, DeviceThread[] threads) {
+	DeviceThread(Socket clientSocket, DeviceThread[] threads) {
 		this.clientSocket = clientSocket;
 		this.threads = threads;
 		maxClientsCount = threads.length;
@@ -36,14 +35,12 @@ public class DeviceThread extends Thread {
 			sin = clientSocket.getInputStream();
 			sout = clientSocket.getOutputStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		// Конвертируем потоки в другой тип, чтоб легче обрабатывать
 		// текстовые сообщения.
-		in = new DataInputStream(sin);
-		out = new DataOutputStream(sout);
+		inputStream = new DataInputStream(sin);
+		outputStream = new DataOutputStream(sout);
 		start();
 	}
 
@@ -52,17 +49,17 @@ public class DeviceThread extends Thread {
 		DeviceThread[] threads = this.threads;
 		try {
 			// IP пользователя
-			userIp = clientSocket.getInetAddress().getHostAddress();
+			deviceIp = clientSocket.getInetAddress().getHostAddress();
 			// Нотификация о подключении нового пользователя
 			multiDeviceServer.onDeviceConnected(this);
 			// Помещаем пользователя в список пользователей
-			DeviceObserverThreadServer.clientList.add(this);
+			DeviceObserverThreadServer.getDeviceThreadList().add(this);
 			// Отправляем всем сообщение
 			multiDeviceServer.sendMessageDevice(null,
-					"Подключено исполнительное устройство: " + userIp);
+					"Подключено исполнительное устройство: " + deviceIp);
 			while (true) {
 
-				status = in.readUTF();
+				String status = inputStream.readUTF();
 				if (status == null) {
 					// Невозможно прочитать данные, пользователь отключился от
 					// сервера
@@ -82,20 +79,18 @@ public class DeviceThread extends Thread {
 						System.out
 								.println("Sending this line to the server...");
 					}
-
 				}
 
 				// -----check isStopped and send quit---------
 				if (ClientObserverThreadServer.isStopped()) {
 					System.out.println("quit");
-
-					out.writeUTF("quit");
-					out.flush();
+					outputStream.writeUTF("quit");
+					outputStream.flush();
 					close();
 				}
 				for (int i = 0; i < maxClientsCount; i++) {
 					if (threads[i] != null && threads[i] != this) {
-						threads[i].out.writeUTF("*** A new user " + status
+						threads[i].outputStream.writeUTF("*** A new user " + status
 								+ " entered the command post !!! ***");
 					}
 				}
@@ -112,10 +107,19 @@ public class DeviceThread extends Thread {
 				}
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	public void close() {
+	DataOutputStream getOutputStream() {
+		return outputStream;
+	}
+
+	void setOutputStream(DataOutputStream outputStream) {
+		this.outputStream = outputStream;
+	}
+
+	private void close() {
 		System.out.println("I'm close...");
 
 		try {
@@ -123,16 +127,15 @@ public class DeviceThread extends Thread {
 			multiDeviceServer.onDeviceDisconnected(this);
 			// Отправляем всем сообщение
 			multiDeviceServer.sendMessageDevice(null,
-					"Отключено исполнительное устройство: " + userIp);
+					"Отключено исполнительное устройство: " + deviceIp);
 			// Удаляем пользователя со списка онлайн
-			DeviceObserverThreadServer.clientList.remove(this);
-			in.close();
-			out.close();
+			DeviceObserverThreadServer.getDeviceThreadList().remove(this);
+			inputStream.close();
+			outputStream.close();
 			clientSocket.close();
 			if (clientSocket != null)
 				clientSocket.close();
 		} catch (IOException e) {
-			// TODO Автоматически созданный блок catch
 			e.printStackTrace();
 		}
 	}

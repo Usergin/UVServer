@@ -2,7 +2,7 @@ package business.control_panel;
 
 public interface ControlPanelInteractor {
     void startDeviceServer();
-    void startUserServer();
+    void startClientServer();
     void stopDeviceServer();
-    void stopUserServer();
+    void stopClientServer();
 }
