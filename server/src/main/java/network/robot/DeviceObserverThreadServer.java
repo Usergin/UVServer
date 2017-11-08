@@ -1,5 +1,6 @@
 package network.robot;
 
+import data.model.ConnectionState;
 import data.model.DeviceServerState;
 import network.client.ClientListener;
 import network.client.ClientObserverThreadServer;
@@ -40,12 +41,12 @@ public class DeviceObserverThreadServer implements Runnable, DeviceListener,
 		 */
         try {
 //            callClientObserverServer();
-            serverSocket = new ServerSocket(AppConstants.TYPE_DEVICE_PORT);
+            serverSocket = new ServerSocket(AppConstants.DEVICE_PORT);
             System.out.println("Waiting for a device...");
             String ip = InetAddress.getLocalHost()
                     .getHostAddress();
             // Нотификация события: сервер запущен
-            serverForDeviceStarted(ip, AppConstants.TYPE_DEVICE_PORT);
+            serverForDeviceStarted(ip, AppConstants.DEVICE_PORT);
         } catch (IOException e) {
             System.out.println(e);
             serverForDeviceStopped();
@@ -174,9 +175,11 @@ public class DeviceObserverThreadServer implements Runnable, DeviceListener,
 
     public void onDeviceConnected(DeviceThread device) {
         synchronized (lock) {
-            for (DeviceListener listener : listenerList) {
-                listener.onDeviceConnected(device);
-            }
+            RxBus.instanceOf().setSubjectConnectionState(
+                    new ConnectionState(AppConstants.DEVICE_TYPE, device.getDeviceIp(), true));
+//            for (DeviceListener listener : listenerList) {
+//                listener.onDeviceConnected(device);
+//            }
         }
     }
 

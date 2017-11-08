@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import com.jfoenix.controls.JFXListView?>
 <?import com.jfoenix.controls.JFXToggleButton?>
-<?import com.jfoenix.controls.JFXTreeTableView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Label?>
@@ -13,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="rootPane" minHeight="600" minWidth="827.0" prefHeight="600.0" prefWidth="827.0" style="-fx-background-color: #616161;" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:id="rootPane" minHeight="600" minWidth="827.0" prefHeight="600.0" prefWidth="827.0" style="-fx-background-color: #616161;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <Region maxHeight="-Infinity" prefHeight="119.0" prefWidth="650.0" style="-fx-background-color: #424242;" StackPane.alignment="TOP_CENTER">
             <cursor>
@@ -36,22 +43,21 @@
                 <Insets top="100.0" />
             </StackPane.margin>
         </Separator>
-        <SplitPane dividerPositions="0.29797979797979796" maxHeight="-Infinity" maxWidth="-Infinity" style="-fx-background-color: #616161;" StackPane.alignment="BOTTOM_CENTER">
+        <SplitPane dividerPositions="0.29797979797979796" maxHeight="-Infinity" minHeight="-Infinity" style="-fx-background-color: #616161;" StackPane.alignment="TOP_CENTER">
             <items>
                 <AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #424242; -fx-effect: dropshadow(gaussian, rgb(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,1.5); -fx-background-radius: 3;">
                     <children>
-                        <VBox>
+                        <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                        <JFXToggleButton fx:id="btnStateServer" mnemonicParsing="false" onAction="#changeServerState" prefHeight="81.0" prefWidth="269.0" text="Запустить сервер" textFill="WHITE">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </JFXToggleButton>
-                                <JFXTreeTableView fx:id="tableViewStateServer" prefWidth="271.0" style="-fx-background-color: #616161;">
-                                    <opaqueInsets>
-                                        <Insets />
-                                    </opaqueInsets>
-                                </JFXTreeTableView>
+                                <JFXToggleButton fx:id="btnStateServer" mnemonicParsing="false" onAction="#changeServerState" prefHeight="81.0" prefWidth="269.0" text="Запустить сервер" textAlignment="CENTER" textFill="WHITE">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                                </JFXToggleButton>
+                                <JFXListView fx:id="listStateServer" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="400.0" style="-fx-background-color: #616161;" />
                             </children>
                         </VBox>
                     </children>
@@ -59,15 +65,21 @@
                         <Insets />
                     </opaqueInsets>
                 </AnchorPane>
-                <AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #424242; -fx-effect: dropshadow(gaussian, rgb(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,1.5); -fx-background-radius: 3;">
+                <AnchorPane focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #424242; -fx-effect: dropshadow(gaussian, rgb(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,1.5); -fx-background-radius: 3;">
                     <opaqueInsets>
                         <Insets left="10.0" />
                     </opaqueInsets>
                     <children>
-                        <JFXTreeTableView fx:id="tableViewCommand" prefHeight="443.0" prefWidth="552.0" style="-fx-background-color: #616161;" />
+                        <JFXListView fx:id="listCommand" style="-fx-background-color: #616161;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                     </children>
                 </AnchorPane>
             </items>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <StackPane.margin>
+            <Insets top="110.0" />
+         </StackPane.margin>
         </SplitPane>
     </children>
 </StackPane>

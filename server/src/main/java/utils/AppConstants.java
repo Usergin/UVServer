@@ -7,9 +7,13 @@ public class AppConstants {
 	final public static int TYPE_SECOND_TOKEN_REQUEST = 2;
 	
 	// -----------ports---------------------------
-	final public static int TYPE_CLIENT_PORT = 10083;
-	final public static int TYPE_DEVICE_PORT = 10082;
-	
+	final public static int CLIENT_PORT = 10083;
+	final public static int DEVICE_PORT = 10082;
+
+	//----------------------------------------------
+	final public static int DEVICE_TYPE = 0;
+	final public static int CLIENT_TYPE = 1;
+
 	// -----------type request---------------------
 
 	final public static int TYPE_COMMAND_REQUEST = 1;

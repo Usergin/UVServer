@@ -16,14 +16,18 @@ public class ControlPanelPresenterImpl implements ControlPanelPresenter {
         this.controlPanelView = controlPanelView;
         RxBus.instanceOf().getDeviceServerState()
                 .subscribe(deviceServerState -> {
+                    controlPanelView.addServerStateToList(deviceServerState.getIp());
+                    controlPanelView.addCommandToList(deviceServerState.getIp());
                     controlPanelView.showSnackBar(deviceServerState.getIp());
                 });
         RxBus.instanceOf().getClientServerState()
                 .subscribe(clientServerState -> {
+                    controlPanelView.addServerStateToList(clientServerState.getIp());
                     controlPanelView.showSnackBar(clientServerState.getIp());
                 });
         RxBus.instanceOf().getSubjectConnectionState()
                 .subscribe(connectionStateConsumer -> {
+                    controlPanelView.addServerStateToList(connectionStateConsumer.getIp()+ connectionStateConsumer.isState());
                     controlPanelView.showSnackBar(connectionStateConsumer.getIp() + connectionStateConsumer.isState());
                 });
     }

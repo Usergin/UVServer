@@ -1,5 +1,6 @@
 package gui.control_panel;
 
+import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.controls.JFXToggleButton;
 import com.jfoenix.controls.JFXTreeTableView;
@@ -40,7 +41,9 @@ public class ControlPanelController implements ControlPanelView {
 //    @ViewNode
 //    private JFXPasswordField txtPassword;
     @FXML
-    private JFXTreeTableView tableViewStateServer;
+    private JFXListView listStateServer;
+    @FXML
+    private JFXListView listCommand;
     @FXML
     private JFXToggleButton btnStateServer;
     private static final String ERROR = "error";
@@ -95,7 +98,10 @@ public class ControlPanelController implements ControlPanelView {
             controlPanelPresenter.setOnDeviceServer(true);
             controlPanelPresenter.setOnClientServer(true);
         }
-//        controlPanelPresenter.onAuthentication(new Authentication(username.get(), getHashedValue(password.get())));
+        else {
+            controlPanelPresenter.setOnDeviceServer(false);
+            controlPanelPresenter.setOnClientServer(false);
+        }
     }
 
     @Override
@@ -114,12 +120,17 @@ public class ControlPanelController implements ControlPanelView {
     }
 
     @Override
-    public void addServerState(String str) {
-
+    public void addServerStateToList(String str) {
+        Platform.runLater(new Runnable(){
+            @Override
+            public void run() {  listStateServer.getItems().add(str);
+        }});
     }
 
     @Override
-    public void addCommand(String str) {
-
+    public void addCommandToList(String str) {
+        Platform.runLater(new Runnable(){
+            @Override
+            public void run() { listCommand.getItems().add(str); }});
     }
 }

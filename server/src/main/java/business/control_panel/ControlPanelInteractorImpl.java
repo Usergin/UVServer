@@ -46,15 +46,15 @@ public class ControlPanelInteractorImpl implements ControlPanelInteractor, Devic
             clientObserverThreadServer.stop();
     }
 
-    @Override
-    public void serverForDeviceStarted(String ip, int port) {
-
-    }
-
-    @Override
-    public void serverForDeviceStopped() {
-
-    }
+//    @Override
+//    public void serverForDeviceStarted(String ip, int port) {
+//
+//    }
+//
+//    @Override
+//    public void serverForDeviceStopped() {
+//
+//    }
 
     @Override
     public void onDeviceConnected(DeviceThread device) {

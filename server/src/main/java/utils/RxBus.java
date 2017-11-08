@@ -58,12 +58,12 @@ public class RxBus {
         return subjectDeviceState;
     }
 
-    public PublishSubject<ConnectionState> getSubjectConnectionState() {
+    public Observable<ConnectionState> getSubjectConnectionState() {
         return subjectConnectionState;
     }
 
-    public void setSubjectConnectionState(PublishSubject<ConnectionState> subjectConnectionState) {
-        this.subjectConnectionState = subjectConnectionState;
+    public void setSubjectConnectionState(ConnectionState object) {
+        this.subjectConnectionState.onNext(object);
     }
 
     //

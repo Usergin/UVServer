@@ -39,14 +39,12 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
 		 */
         try {
 //          callDeviceObserverServer();
-            serverSocket = new ServerSocket(AppConstants.TYPE_CLIENT_PORT);
+            serverSocket = new ServerSocket(AppConstants.CLIENT_PORT);
             System.out.println("Waiting for a client...");
             String ip = InetAddress.getLocalHost()
                     .getHostAddress();
             // Нотификация события: сервер запущен
-            RxBus.instanceOf().setClientServerState
-                    (new ClientServerState(ip, AppConstants.TYPE_CLIENT_PORT, true));
-//            serverForClientStarted(ip, AppConstants.TYPE_CLIENT_PORT);
+            serverForClientStarted(ip,  AppConstants.CLIENT_PORT);
 
         } catch (IOException e) {
             System.out.println(e);
@@ -60,7 +58,6 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
             try {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Got a client :)");
-
                 int i = 0;
                 for (i = 0; i < maxClientsCount; i++) {
                     if (threads[i] == null) {
@@ -87,13 +84,10 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
         connect();
     }
 
-    public static LinkedList<ClientThread> getClientList() {
+    static LinkedList<ClientThread> getClientList() {
         return clientList;
     }
 
-    public static void setClientList(LinkedList<ClientThread> clientList) {
-        ClientObserverThreadServer.clientList = clientList;
-    }
     public synchronized static boolean isStopped() {
         return isStopped;
     }
@@ -151,17 +145,21 @@ public class ClientObserverThreadServer implements Runnable, ClientListener,
 
     public void serverForClientStarted(String ip, int port) {
         synchronized (lock) {
-            for (ClientListener listener : listenerList) {
-                listener.serverForClientStarted(ip, port);
-            }
+            RxBus.instanceOf().setClientServerState
+                    (new ClientServerState(ip,port, true));
+//            for (ClientListener listener : listenerList) {
+//                listener.serverForClientStarted(ip, port);
+//            }
         }
     }
 
     public void serverForClientStopped() {
         synchronized (lock) {
-            for (ClientListener listener : listenerList) {
-                listener.serverForClientStopped();
-            }
+            RxBus.instanceOf().setClientServerState
+                    (new ClientServerState(null,-1, true));
+//            for (ClientListener listener : listenerList) {
+//                listener.serverForClientStopped();
+//            }
         }
     }
 

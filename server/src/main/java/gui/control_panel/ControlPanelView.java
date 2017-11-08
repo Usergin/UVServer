@@ -5,6 +5,6 @@ public interface ControlPanelView {
     void showProgress(boolean val);
     void openUserConnection(boolean val);
     void openDeviceConnection(boolean val);
-    void addServerState(String str);
-    void addCommand(String str);
+    void addServerStateToList(String str);
+    void addCommandToList(String str);
 }

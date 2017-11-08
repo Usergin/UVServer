@@ -55,8 +55,8 @@ public class DeviceThread extends Thread {
 			// Помещаем пользователя в список пользователей
 			DeviceObserverThreadServer.getDeviceThreadList().add(this);
 			// Отправляем всем сообщение
-			multiDeviceServer.sendMessageDevice(null,
-					"Подключено исполнительное устройство: " + deviceIp);
+//			multiDeviceServer.sendMessageDevice(null,
+//					"Подключено исполнительное устройство: " + deviceIp);
 			while (true) {
 
 				String status = inputStream.readUTF();
@@ -117,6 +117,10 @@ public class DeviceThread extends Thread {
 
 	void setOutputStream(DataOutputStream outputStream) {
 		this.outputStream = outputStream;
+	}
+
+	public String getDeviceIp() {
+		return deviceIp;
 	}
 
 	private void close() {
