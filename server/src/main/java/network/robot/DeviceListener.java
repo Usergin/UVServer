@@ -2,24 +2,24 @@ package network.robot;
 
 
 public interface DeviceListener {
-	/****** События *******/
+	/****** РЎРѕР±С‹С‚РёСЏ *******/
 	 
-//    // Сервер запустился
+//    // РЎРµСЂРІРµСЂ Р·Р°РїСѓС‰РµРЅ
 //    void serverForDeviceStarted(String ip, int port);
 //
-//    // Сервер прекратил работу
+//    // РЎРµСЂРІРµСЂ РѕСЃС‚Р°РЅРѕРІР»РµРЅ
 //    void serverForDeviceStopped();
  
-    // Подключился новый пользователь
+    // РџРѕРґРєР»СЋС‡РёР»РѕСЃСЊ РЅРѕРІРѕРµ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ
     void onDeviceConnected(DeviceThread device);
  
-    // Пользователь отключился
+    // РЈСЃС‚СЂРѕР№СЃС‚РІРѕ РѕС‚РєР»СЋС‡РёР»РѕСЃСЊ
     void onDeviceDisconnected(DeviceThread device);
  
-    // Получено сообщение от пользователя
+    // РџРѕР»СѓС‡РµРЅРѕ СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ СѓСЃС‚СЂРѕР№СЃС‚РІР°
     void onDeviceMessageReceived(DeviceThread device, String message);
     
-    // Получено сообщение от пользователя
+    // РџРѕР»СѓС‡РµРЅРѕ СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ РѕРїРµСЂР°С‚РѕСЂР°
     void onDeviceMessageReceivedForClient(DeviceThread device, String message);
     
 }

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.mindorks.nybus:nybus-java:1.0.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mindorks.nybus/nybus-java/1.0.0/b8fcc2167bfacf07ba72e3f39d45ca4deb5f14a4/nybus-java-1.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mindorks.nybus/nybus-java/1.0.0/aadbeca4c2baf02c60455066cf36043cf38645b8/nybus-java-1.0.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mindorks.nybus/nybus-java/1.0.0/d79f4c551da5a6941dfe63b758be7913c366da9d/nybus-java-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

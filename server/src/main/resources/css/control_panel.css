@@ -126,7 +126,7 @@
 
 .jfx-list-cell:filled:hover,
 .jfx-list-cell:selected .label {
-    -fx-text-fill: blueviolet;
+    -fx-text-fill: #009688;
 }
 
 .jfx-list-cell .jfx-rippler {

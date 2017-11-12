@@ -121,16 +121,21 @@ public class ControlPanelController implements ControlPanelView {
 
     @Override
     public void addServerStateToList(String str) {
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {  listStateServer.getItems().add(str);
-        }});
+        Platform.runLater(() -> {
+            listStateServer.getItems().add(str);
+            int lastElement = listStateServer.getItems().size()-1;
+            listStateServer.getSelectionModel().select(lastElement);
+            listStateServer.scrollTo(lastElement);
+        });
     }
 
     @Override
     public void addCommandToList(String str) {
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() { listCommand.getItems().add(str); }});
+        Platform.runLater(() -> {
+            listCommand.getItems().add(str);
+            int lastElement = listCommand.getItems().size()-1;
+            listCommand.getSelectionModel().select(lastElement);
+            listCommand.scrollTo(lastElement);
+        });
     }
 }

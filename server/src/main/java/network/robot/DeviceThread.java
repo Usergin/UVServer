@@ -1,8 +1,13 @@
 package network.robot;
 
 
-import network.client.ClientObserverThreadServer;
+import com.mindorks.nybus.NYBus;
+import com.mindorks.nybus.event.Channel;
+import data.model.ConnectionState;
+import network.Dispatcher;
+import utils.AppConstants;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.net.Socket;
 
@@ -11,137 +16,137 @@ import java.net.Socket;
  * data to client
  **/
 public class DeviceThread extends Thread {
-	private Socket clientSocket = null;
-	private final DeviceThread[] threads;
-	private int maxClientsCount;
-	private DeviceObserverThreadServer multiDeviceServer;
-	private InputStream sin;
-	private OutputStream sout;
-	// IP пользователя
-	private String deviceIp = "";
-	private DataInputStream inputStream = null;
-	private DataOutputStream outputStream = null;
-	private ClientObserverThreadServer multiClientThread;
+    @Inject
+    Dispatcher dispatcher;
+    private Socket deviceSocket = null;
+    private final DeviceThread[] threads;
+    private int maxClientsCount;
+    private InputStream sin;
+    private OutputStream sout;
+    // IP пользователя
+    private String deviceIp = "";
+    private DataInputStream inputStream = null;
+    private DataOutputStream outputStream = null;
 
-	DeviceThread(Socket clientSocket, DeviceThread[] threads) {
-		this.clientSocket = clientSocket;
-		this.threads = threads;
-		maxClientsCount = threads.length;
-		multiDeviceServer = new DeviceObserverThreadServer();
-		// Берем входной и выходной потоки сокета, теперь можем
-		// получать и
-		// отсылать данные клиенту.
-		try {
-			sin = clientSocket.getInputStream();
-			sout = clientSocket.getOutputStream();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		// Конвертируем потоки в другой тип, чтоб легче обрабатывать
-		// текстовые сообщения.
-		inputStream = new DataInputStream(sin);
-		outputStream = new DataOutputStream(sout);
-		start();
-	}
+    DeviceThread(Socket deviceSocket, DeviceThread[] threads) {
+        this.deviceSocket = deviceSocket;
+        this.threads = threads;
+        maxClientsCount = threads.length;
+        // Берем входной и выходной потоки сокета, теперь можем
+        // получать и
+        // отсылать данные клиенту.
+        try {
+            sin = deviceSocket.getInputStream();
+            sout = deviceSocket.getOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // Конвертируем потоки в другой тип, чтоб легче обрабатывать
+        // текстовые сообщения.
+        inputStream = new DataInputStream(sin);
+        outputStream = new DataOutputStream(sout);
+        start();
+    }
 
-	public void run() {
-		int maxClientsCount = this.maxClientsCount;
-		DeviceThread[] threads = this.threads;
-		try {
-			// IP пользователя
-			deviceIp = clientSocket.getInetAddress().getHostAddress();
-			// Нотификация о подключении нового пользователя
-			multiDeviceServer.onDeviceConnected(this);
-			// Помещаем пользователя в список пользователей
-			DeviceObserverThreadServer.getDeviceThreadList().add(this);
-			// Отправляем всем сообщение
+    public void run() {
+        int maxClientsCount = this.maxClientsCount;
+        DeviceThread[] threads = this.threads;
+        try {
+            // IP пользователя
+            deviceIp = deviceSocket.getInetAddress().getHostAddress();
+            // Нотификация о подключении нового пользователя
+            NYBus.get().post(new ConnectionState(AppConstants.DEVICE_TYPE, deviceIp, true), Channel.THREE);
+//			multiDeviceServer.onDeviceConnected(this);
+            // Помещаем пользователя в список пользователей
+            Dispatcher.addDeviceToHashMap(this);
+            dispatcher.sendMessageAllClient("Подключено устройство: "
+                    + deviceIp);
+            // Отправляем всем сообщение
 //			multiDeviceServer.sendMessageDevice(null,
 //					"Подключено исполнительное устройство: " + deviceIp);
-			while (true) {
+            while (true) {
+                String status = inputStream.readUTF();
+                if (status == null) {
+                    // Невозможно прочитать данные, пользователь отключился от
+                    // сервера
+                    close();
+                    // Останавливаем бесконечный цикл
+                    break;
+                } else if (!status.isEmpty()) {
+                    // Нотификация: получено сообщение
+                    if (String.valueOf(status).equals("END")) {
+                        System.out.println("Get end : " + status);
+                        System.out.println("Device disconnected");
+                        System.out.println("Closing connections & channels.");
+                        inputStream.close();
+                        outputStream.close();
+                        close();
+                    } else {
+                        dispatcher.onDeviceMessageReceivedForClient(
+                                this, status);
+                        System.out
+                                .println("Sending this line to the server...");
+                    }
+                }
 
-				String status = inputStream.readUTF();
-				if (status == null) {
-					// Невозможно прочитать данные, пользователь отключился от
-					// сервера
-					close();
-					// Останавливаем бесконечный цикл
-					break;
-				} else if (!status.isEmpty()) {
-					// Нотификация: получено сообщение
-					if (String.valueOf(status).equals("END")) {
-						System.out.println("Get end : " + status);
-						close();
-					} else {
-						multiDeviceServer.onDeviceMessageReceivedForClient(
-								this, status);
-						multiDeviceServer.sendMessageDevice(null, status);
-						System.out.println("this line ForClient: " + status);
-						System.out
-								.println("Sending this line to the server...");
-					}
-				}
-
-				// -----check isStopped and send quit---------
-				if (ClientObserverThreadServer.isStopped()) {
-					System.out.println("quit");
-					outputStream.writeUTF("quit");
-					outputStream.flush();
-					close();
-				}
-				for (int i = 0; i < maxClientsCount; i++) {
-					if (threads[i] != null && threads[i] != this) {
-						threads[i].outputStream.writeUTF("*** A new user " + status
-								+ " entered the command post !!! ***");
-					}
-				}
+                // -----check isStopped and send quit---------
+                if (DeviceObserverThreadServer.isStopped()) {
+                    System.out.println("quit");
+                    outputStream.writeUTF("quit");
+                    outputStream.flush();
+                    close();
+                }
+                for (int i = 0; i < maxClientsCount; i++) {
+                    if (threads[i] != null && threads[i] != this) {
+                        threads[i].outputStream.writeUTF("A new device");
+                    }
+                }
 
 				/*
-				 * Clean up. Set the current thread variable to null so that a
+                 * Clean up. Set the current thread variable to null so that a
 				 * new client could be accepted by the server.
 				 */
 
-				for (int i = 0; i < maxClientsCount; i++) {
-					if (threads[i] == this) {
-						threads[i] = null;
-					}
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+                for (int i = 0; i < maxClientsCount; i++) {
+                    if (threads[i] == this) {
+                        threads[i] = null;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	DataOutputStream getOutputStream() {
-		return outputStream;
-	}
+    public DataOutputStream getOutputStream() {
+        return outputStream;
+    }
 
-	void setOutputStream(DataOutputStream outputStream) {
-		this.outputStream = outputStream;
-	}
+    public void setOutputStream(DataOutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
 
-	public String getDeviceIp() {
-		return deviceIp;
-	}
+    public String getDeviceIp() {
+        return deviceIp;
+    }
 
-	private void close() {
-		System.out.println("I'm close...");
+    private void close() {
+        System.out.println("I'm close...");
 
-		try {
-			// Нотификация: пользователь отключился
-			multiDeviceServer.onDeviceDisconnected(this);
-			// Отправляем всем сообщение
-			multiDeviceServer.sendMessageDevice(null,
-					"Отключено исполнительное устройство: " + deviceIp);
-			// Удаляем пользователя со списка онлайн
-			DeviceObserverThreadServer.getDeviceThreadList().remove(this);
-			inputStream.close();
-			outputStream.close();
-			clientSocket.close();
-			if (clientSocket != null)
-				clientSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            // Нотификация: пользователь отключился
+            NYBus.get().post(new ConnectionState(AppConstants.DEVICE_TYPE, getDeviceIp(), false), Channel.THREE);
+            // Отправляем всем сообщение
+            Dispatcher.removeDeviceFromHashMap(this);
+
+            inputStream.close();
+            outputStream.close();
+            deviceSocket.close();
+            if (deviceSocket != null)
+                deviceSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

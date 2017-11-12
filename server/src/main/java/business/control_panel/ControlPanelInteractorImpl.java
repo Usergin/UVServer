@@ -1,6 +1,10 @@
 package business.control_panel;
 
 import data.remote.NetworkService;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
+import network.TestClient;
 import network.client.ClientListener;
 import network.client.ClientObserverThreadServer;
 import network.client.ClientThread;
@@ -21,7 +25,6 @@ public class ControlPanelInteractorImpl implements ControlPanelInteractor, Devic
     @Override
     public void startDeviceServer() {
         deviceObserverThreadServer = new DeviceObserverThreadServer();
-        deviceObserverThreadServer.addListener(this);
         deviceObserverThreadServer.setFalseStopped();
         new Thread(deviceObserverThreadServer).start();
     }
@@ -29,9 +32,26 @@ public class ControlPanelInteractorImpl implements ControlPanelInteractor, Devic
     @Override
     public void startClientServer() {
         clientObserverThreadServer = new ClientObserverThreadServer();
-        clientObserverThreadServer.addListener(this);
         clientObserverThreadServer.setFalseStopped();
         new Thread(clientObserverThreadServer).start();
+        Task<Void> sleeper = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                }
+                return null;
+            }
+        };
+        sleeper.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                TestClient testClient = new TestClient();
+                new Thread(testClient).start();
+            }
+        });
+        new Thread(sleeper).start();
     }
 
     @Override
