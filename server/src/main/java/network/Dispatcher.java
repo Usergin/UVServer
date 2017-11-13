@@ -4,11 +4,15 @@ import com.google.gson.Gson;
 import com.mindorks.nybus.NYBus;
 import com.mindorks.nybus.annotation.Subscribe;
 import com.mindorks.nybus.event.Channel;
+import dagger.Injector;
+import dagger.application.NetworkModule;
+import data.model.ConnectionState;
 import network.client.ClientThread;
 import network.robot.DeviceThread;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 public class Dispatcher {
@@ -31,6 +35,8 @@ public class Dispatcher {
 
     public Dispatcher() {
         System.out.println("Create Dispatcher");
+        Injector.inject(this, Arrays.asList(new NetworkModule()));
+
         NYBus.get().register(this, Channel.THREE, Channel.FOUR, Channel.FIVE, Channel.SIX);
         NYBus.get().enableLogging();
 
@@ -38,24 +44,29 @@ public class Dispatcher {
 
     public static void addDeviceToHashMap(DeviceThread deviceThread) {
         synchronized (lock) {
+            System.out.println("addDeviceToHashMap" + deviceThread.getDeviceIp());
             deviceThreadList.put(deviceThread.getDeviceIp(), deviceThread);
         }
     }
 
     public static void removeDeviceFromHashMap(DeviceThread deviceThread) {
         synchronized (lock) {
-            deviceThreadList.remove(deviceThread);
+            System.out.println("removeDeviceFromHashMap" + deviceThread.getDeviceIp());
+            if (deviceThreadList.containsValue(deviceThread))
+                deviceThreadList.remove(deviceThread);
         }
     }
 
     public static void addClientToHashMap(ClientThread clientThread, String ip) {
         synchronized (lock) {
+            System.out.println("addClientToHashMap" + clientThread.getClientIp());
             clientList.put(clientThread, deviceThreadList.get(ip));
         }
     }
 
     public static void removeClientFromHashMap(ClientThread clientThread) {
         synchronized (lock) {
+            System.out.println("removeClientFromHashMap" + clientThread.getClientIp());
             clientList.remove(clientThread);
         }
     }
@@ -70,6 +81,7 @@ public class Dispatcher {
     // ***************** отправка сообщения всем пользователям ****************/
     @Subscribe(channelId = Channel.FOUR)
     public void sendMessageAllClient(String message) {
+        System.out.println("sendMessageAllClient" + message);
         for (ClientThread user : clientList.keySet()) {
             try {
                 user.getOutputStream().writeUTF(message);
@@ -83,6 +95,7 @@ public class Dispatcher {
     // ***************** отправка сообщения всем устройствам ****************/
     @Subscribe(channelId = Channel.FIVE)
     void sendMessageForAllDevice(String message) {
+        System.out.println("sendMessageForAllDevice" + message);
         synchronized (lock) {
             for (DeviceThread device : deviceThreadList.values()) {
                 try {
@@ -97,13 +110,10 @@ public class Dispatcher {
     }
 
     // ***************** отправка сообщения новому пользователю списка устройств ****************/
-    public void sendIpDeviceListDeviceToClient(ClientThread user) {
-        String[] ipList = new String[deviceThreadList.size()];
+    public void sendDeviceIpListToClient(ClientThread user) {
+        System.out.println("sendDeviceIpListToClient " + deviceThreadList.entrySet());
         try {
-            for (int i = 0; i < deviceThreadList.size(); i++) {
-                ipList[i] = deviceThreadList.get(i).getDeviceIp();
-            }
-            user.getOutputStream().writeUTF(gson.toJson(ipList));
+            user.getOutputStream().writeUTF(gson.toJson(deviceThreadList.entrySet()));
             user.getOutputStream().flush();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -132,14 +142,30 @@ public class Dispatcher {
     @Subscribe(channelId = Channel.SIX)
     public void onClientMessageReceivedForDevice(ClientThread user, String message) {
         DeviceThread deviceThread = clientList.get(user);
-        System.out.println("onClientMessageReceivedForDevice: " + deviceThread.getDeviceIp());
-        try {
-            deviceThread.getOutputStream().writeUTF(message);
-            deviceThread.getOutputStream().flush();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if (deviceThread != null) {
+            System.out.println("onClientMessageReceivedForDevice: " + deviceThread.getDeviceIp());
+            try {
+                deviceThread.getOutputStream().writeUTF(message);
+                deviceThread.getOutputStream().flush();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
+
+//    @Subscribe(channelId = Channel.THREE)
+//    public void onChangeStateOfConnection(ConnectionState user, String message) {
+//        DeviceThread deviceThread = clientList.get(user);
+//        if (deviceThread != null) {
+//            System.out.println("onClientMessageReceivedForDevice: " + deviceThread.getDeviceIp());
+//            try {
+//                deviceThread.getOutputStream().writeUTF(message);
+//                deviceThread.getOutputStream().flush();
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//    }
 //        for (ClientListener listener : listenerList) {
 //            listener.onClientMessageReceivedForDevice(user, message);
 //

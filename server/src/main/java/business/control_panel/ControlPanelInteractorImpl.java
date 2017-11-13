@@ -34,24 +34,24 @@ public class ControlPanelInteractorImpl implements ControlPanelInteractor, Devic
         clientObserverThreadServer = new ClientObserverThreadServer();
         clientObserverThreadServer.setFalseStopped();
         new Thread(clientObserverThreadServer).start();
-        Task<Void> sleeper = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                }
-                return null;
-            }
-        };
-        sleeper.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                TestClient testClient = new TestClient();
-                new Thread(testClient).start();
-            }
-        });
-        new Thread(sleeper).start();
+//        Task<Void> sleeper = new Task<Void>() {
+//            @Override
+//            protected Void call() throws Exception {
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException e) {
+//                }
+//                return null;
+//            }
+//        };
+//        sleeper.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+//            @Override
+//            public void handle(WorkerStateEvent event) {
+//                TestClient testClient = new TestClient();
+//                new Thread(testClient).start();
+//            }
+//        });
+//        new Thread(sleeper).start();
     }
 
     @Override

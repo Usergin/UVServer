@@ -48,7 +48,7 @@ public class DeviceObserverThreadServer implements Runnable {
         while (!isStopped) {
             try {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Got a client :)");
+                System.out.println("Got a device :)");
 
                 int i = 0;
                 for (i = 0; i < maxClientsCount; i++) {

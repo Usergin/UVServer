@@ -1,6 +1,5 @@
 package main;
 
-import com.gluonhq.ignite.dagger.DaggerContext;
 import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.svg.SVGGlyphLoader;
 import dagger.Injector;
@@ -32,10 +31,11 @@ public class Main extends Application {
     Parser parser;
     private final int MIN_WIDTH = 850;
     private final int MIN_HEIGHT = 600;
-   @Override
+
+    @Override
     public void start(Stage primaryStage) throws Exception {
         LOG.info("Application started");
-        Injector.inject(this, Arrays.asList(new AppModule() ));
+        Injector.inject(this, Arrays.asList(new AppModule()));
         new Thread(() -> {
             try {
                 //he just loaded some svg from a font file

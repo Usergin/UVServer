@@ -5,8 +5,10 @@ import com.mindorks.nybus.NYBus;
 import com.mindorks.nybus.annotation.Subscribe;
 import com.mindorks.nybus.event.Channel;
 import data.model.ClientServerState;
+import data.model.CommandMessage;
 import data.model.ConnectionState;
 import data.model.DeviceServerState;
+import utils.AppConstants;
 
 public class ControlPanelPresenterImpl implements ControlPanelPresenter {
     private ControlPanelView controlPanelView;
@@ -19,7 +21,7 @@ public class ControlPanelPresenterImpl implements ControlPanelPresenter {
     @Override
     public void setControlPanelView(ControlPanelView controlPanelView) {
         this.controlPanelView = controlPanelView;
-        NYBus.get().register(this, Channel.ONE, Channel.TWO, Channel.THREE);
+        NYBus.get().register(this, Channel.ONE, Channel.TWO, Channel.THREE, Channel.SEVEN);
         NYBus.get().enableLogging();
     }
 
@@ -51,6 +53,45 @@ public class ControlPanelPresenterImpl implements ControlPanelPresenter {
         else
             controlPanelView.addServerStateToList(type + " " + connectionStateConsumer.getIp() + " disconnected");
 //        controlPanelView.showSnackBar(connectionStateConsumer.getIp() + connectionStateConsumer.isState());
+    }
+
+    @Subscribe(channelId = Channel.SEVEN)
+    public void onNewCommand(CommandMessage message) {
+        System.out.println("ControlPresenter message: " + message);
+
+        String command;
+        switch (message.getCommand()) {
+            case AppConstants.FORWARD:
+                command = "go forward";
+                break;
+            case AppConstants.FORWARD_RIGHT:
+                command = "go forward-right";
+                break;
+            case AppConstants.FORWARD_LEFT:
+                command = "go forward-left";
+                break;
+            case AppConstants.BACKWARD:
+                command = "go backward";
+                break;
+            case AppConstants.BACKWARD_RIGHT:
+                command = "go backward-right";
+                break;
+            case AppConstants.BACKWARD_LEFT:
+                command = "go backward-left";
+                break;
+            case AppConstants.RIGHT:
+                command = "go right";
+                break;
+            case AppConstants.LEFT:
+                command = "go left";
+                break;
+            case AppConstants.STOP:
+                command = "stop";
+                break;
+            default:
+                command = message.getCommand();
+        }
+        controlPanelView.addCommandToList(message.getIp() + ": " + command + message.getSpeed());
     }
 
     @Override

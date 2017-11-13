@@ -24,7 +24,6 @@ public class NetworkModule {
     Dispatcher provideDispatcher() {
         return new Dispatcher();
     }
-
     @Provides
     @Singleton
     Gson provideGson() {

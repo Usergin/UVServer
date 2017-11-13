@@ -10,7 +10,7 @@ import java.net.Socket;
 
 public class TestClient implements Runnable{
         private  static final int    serverPort = 10083;
-        private  static final String localhost  = "192.168.1.31";
+        private  static final String localhost  = "192.168.1.94";
 
     private void connect(){
             Socket socket = null;

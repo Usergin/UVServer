@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import com.jfoenix.controls.JFXListView?>
 <?import com.jfoenix.controls.JFXToggleButton?>
 <?import javafx.geometry.Insets?>
@@ -20,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="rootPane" minHeight="600" minWidth="827.0" prefHeight="600.0" prefWidth="827.0" style="-fx-background-color: #616161;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:id="rootPane" minHeight="600" minWidth="827.0" prefHeight="600.0" prefWidth="827.0" style="-fx-background-color: #616161;" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <Region maxHeight="-Infinity" prefHeight="119.0" prefWidth="650.0" style="-fx-background-color: #424242;" StackPane.alignment="TOP_CENTER">
             <cursor>
@@ -45,11 +38,11 @@
         </Separator>
         <SplitPane dividerPositions="0.29797979797979796" maxHeight="-Infinity" minHeight="-Infinity" style="-fx-background-color: #616161;" StackPane.alignment="TOP_CENTER">
             <items>
-                <AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #424242; -fx-effect: dropshadow(gaussian, rgb(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,1.5); -fx-background-radius: 3;">
+                <AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="481.0" prefWidth="345.0" style="-fx-background-color: #424242; -fx-effect: dropshadow(gaussian, rgb(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,1.5); -fx-background-radius: 3;">
                     <children>
                         <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                                <JFXToggleButton fx:id="btnStateServer" mnemonicParsing="false" onAction="#changeServerState" prefHeight="81.0" prefWidth="269.0" text="Запустить сервер" textAlignment="CENTER" textFill="WHITE">
+                                <JFXToggleButton fx:id="btnStateServer" mnemonicParsing="false" onAction="#changeServerState" prefHeight="81.0" prefWidth="295.0" text="Запустить сервер" textAlignment="CENTER" textFill="WHITE">
                                     <font>
                                         <Font size="14.0" />
                                     </font>

@@ -3,6 +3,8 @@ package network.robot;
 
 import com.mindorks.nybus.NYBus;
 import com.mindorks.nybus.event.Channel;
+import dagger.Injector;
+import dagger.application.NetworkModule;
 import data.model.ConnectionState;
 import network.Dispatcher;
 import utils.AppConstants;
@@ -10,6 +12,7 @@ import utils.AppConstants;
 import javax.inject.Inject;
 import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * This class is designed for create arduino device thread and send information
@@ -29,9 +32,11 @@ public class DeviceThread extends Thread {
     private DataOutputStream outputStream = null;
 
     DeviceThread(Socket deviceSocket, DeviceThread[] threads) {
+        Injector.inject(this, Arrays.asList(new NetworkModule()));
         this.deviceSocket = deviceSocket;
         this.threads = threads;
         maxClientsCount = threads.length;
+//        dispatcher = Injector.inject();
         // Берем входной и выходной потоки сокета, теперь можем
         // получать и
         // отсылать данные клиенту.
@@ -59,6 +64,8 @@ public class DeviceThread extends Thread {
 //			multiDeviceServer.onDeviceConnected(this);
             // Помещаем пользователя в список пользователей
             Dispatcher.addDeviceToHashMap(this);
+            System.out
+                    .println("dispatcher..." + dispatcher);
             dispatcher.sendMessageAllClient("Подключено устройство: "
                     + deviceIp);
             // Отправляем всем сообщение
@@ -115,6 +122,8 @@ public class DeviceThread extends Thread {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            NYBus.get().post(new ConnectionState(AppConstants.DEVICE_TYPE, getDeviceIp(), false), Channel.THREE);
+            Dispatcher.removeDeviceFromHashMap(this);
         }
     }
 

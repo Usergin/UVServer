@@ -131,6 +131,8 @@ public class ControlPanelController implements ControlPanelView {
 
     @Override
     public void addCommandToList(String str) {
+        System.out.println("Controller message: " + str);
+
         Platform.runLater(() -> {
             listCommand.getItems().add(str);
             int lastElement = listCommand.getItems().size()-1;
