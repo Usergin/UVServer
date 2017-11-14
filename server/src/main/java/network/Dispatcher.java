@@ -6,12 +6,14 @@ import com.mindorks.nybus.annotation.Subscribe;
 import com.mindorks.nybus.event.Channel;
 import dagger.Injector;
 import dagger.application.NetworkModule;
-import data.model.ConnectionState;
 import network.client.ClientThread;
 import network.robot.DeviceThread;
+import utils.AppConstants;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
@@ -84,8 +86,8 @@ public class Dispatcher {
         System.out.println("sendMessageAllClient" + message);
         for (ClientThread user : clientList.keySet()) {
             try {
-                user.getOutputStream().writeUTF(message);
-                user.getOutputStream().flush();
+                user.getDataOutputStream().write(message.getBytes());
+                user.getDataOutputStream().flush();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -99,8 +101,8 @@ public class Dispatcher {
         synchronized (lock) {
             for (DeviceThread device : deviceThreadList.values()) {
                 try {
-                    device.getOutputStream().writeUTF(message);
-                    device.getOutputStream().flush();
+                    device.getDataOutputStream().write(message.getBytes());
+                    device.getDataOutputStream().flush();
                 } catch (Exception ex) {
                     System.out.println("Exception!" + ex);
 
@@ -111,10 +113,12 @@ public class Dispatcher {
 
     // ***************** отправка сообщения новому пользователю списка устройств ****************/
     public void sendDeviceIpListToClient(ClientThread user) {
-        System.out.println("sendDeviceIpListToClient " + deviceThreadList.entrySet());
         try {
-            user.getOutputStream().writeUTF(gson.toJson(deviceThreadList.entrySet()));
-            user.getOutputStream().flush();
+            String msg = AppConstants.IP_LIST + deviceThreadList.keySet().toString();
+            System.out.println("sendDeviceIpListToClient " + msg.length() + msg);
+            user.getDataOutputStream().writeInt(msg.length());
+            user.getDataOutputStream().write(msg.getBytes());
+            user.getDataOutputStream().flush();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -122,14 +126,15 @@ public class Dispatcher {
 
     // ***************** отправка сообщения от устройства определенным пользователям ****************/
     @Subscribe(channelId = Channel.FIVE)
-    public void onDeviceMessageReceivedForClient(DeviceThread deviceThread, String message) {
-        System.out.println("onDeviceMessageReceivedForClient in clientobserver " + message);
+    public void sendMessageDeviceToClient(DeviceThread deviceThread, byte[] message) {
+        System.out.println("sendMessageDeviceToClient in clientobserver " + message);
         for (ClientThread clientThread : clientList.keySet()) {
             if (deviceThread.equals(clientList.get(clientThread))) {
                 try {
-                    System.out.println("onDeviceMessageReceivedForClient " + clientThread.getClientIp());
-                    clientThread.getOutputStream().writeUTF(message);
-                    clientThread.getOutputStream().flush();
+                    System.out.println("sendMessageDeviceToClient " + clientThread.getClientIp());
+                    clientThread.getDataOutputStream().writeInt(message.length);
+                    clientThread.getDataOutputStream().write(message);
+                    clientThread.getDataOutputStream().flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -140,13 +145,34 @@ public class Dispatcher {
 
     // ***************** отправка сообщения от клиента устройству ****************/
     @Subscribe(channelId = Channel.SIX)
-    public void onClientMessageReceivedForDevice(ClientThread user, String message) {
+    public void sendMessageFromClientToDevice(ClientThread user, byte[] message) {
         DeviceThread deviceThread = clientList.get(user);
+        System.out.println("sendMessageFromClientToDevice: " + deviceThread);
+
         if (deviceThread != null) {
-            System.out.println("onClientMessageReceivedForDevice: " + deviceThread.getDeviceIp());
+            System.out.println("sendMessageFromClientToDevice: " + deviceThread.getDeviceIp() + new String(message));
             try {
-                deviceThread.getOutputStream().writeUTF(message);
-                deviceThread.getOutputStream().flush();
+                deviceThread.getDataOutputStream().writeInt(message.length);
+                deviceThread.getDataOutputStream().write(message);
+                deviceThread.getDataOutputStream().flush();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    // ***************** отправка сообщения от клиента устройству ****************/
+    @Subscribe(channelId = Channel.SIX)
+    public void onClientDatagramMessageReceivedForDevice(ClientThread user, DatagramPacket datagramPacket) {
+        DeviceThread deviceThread = clientList.get(user);
+        System.out.println("sendMessageFromClientToDevice: " + deviceThread);
+
+        if (deviceThread != null) {
+            System.out.println("sendMessageFromClientToDevice: " + deviceThread.getDeviceIp());
+            try {
+                datagramPacket.setAddress(InetAddress.getByName(deviceThread.getDeviceIp()));
+                datagramPacket.setPort(AppConstants.DEVICE_PORT);
+                user.getDatagramSocket().send(datagramPacket);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -157,17 +183,17 @@ public class Dispatcher {
 //    public void onChangeStateOfConnection(ConnectionState user, String message) {
 //        DeviceThread deviceThread = clientList.get(user);
 //        if (deviceThread != null) {
-//            System.out.println("onClientMessageReceivedForDevice: " + deviceThread.getDeviceIp());
+//            System.out.println("sendMessageFromClientToDevice: " + deviceThread.getDeviceIp());
 //            try {
-//                deviceThread.getOutputStream().writeUTF(message);
-//                deviceThread.getOutputStream().flush();
+//                deviceThread.getDataOutputStream().writeUTF(message);
+//                deviceThread.getDataOutputStream().flush();
 //            } catch (Exception ex) {
 //                ex.printStackTrace();
 //            }
 //        }
 //    }
 //        for (ClientListener listener : listenerList) {
-//            listener.onClientMessageReceivedForDevice(user, message);
+//            listener.sendMessageFromClientToDevice(user, message);
 //
 //        }
 

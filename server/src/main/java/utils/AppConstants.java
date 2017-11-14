@@ -63,4 +63,7 @@ public class AppConstants {
 	public static final String RIGHT = "RR";
 	public static final String LEFT = "LL";
 	public static final String STOP = "SS";
+
+	public static final String IP_LIST = "IP_LST";
+	public static final String SELECTED_IP = "S_IP";
 }

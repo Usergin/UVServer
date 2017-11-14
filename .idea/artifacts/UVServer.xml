@@ -1,0 +1,42 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="UVServer">
+    <output-path>$PROJECT_DIR$/out/artifacts/UVServer</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="main.Main" />
+        <option name="description" value="" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="title" value="" />
+        <option name="vendor" value="" />
+        <option name="version" value="" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="UVServer.jar">
+        <element id="module-output" name="UVServer" />
+        <element id="library" level="project" name="Gradle: com.gluonhq:ignite-common:1.0.2" />
+        <element id="library" level="project" name="Gradle: com.gluonhq:ignite-dagger:1.0.2" />
+        <element id="library" level="project" name="Gradle: com.google.code.gson:gson:2.8.2" />
+        <element id="library" level="project" name="Gradle: com.google.guava:guava:15.0" />
+        <element id="library" level="project" name="Gradle: com.jfoenix:jfoenix:1.9.0" />
+        <element id="library" level="project" name="Gradle: com.mindorks.nybus:nybus-common:1.0.0" />
+        <element id="library" level="project" name="Gradle: com.mindorks.nybus:nybus-java:1.0.0" />
+        <element id="library" level="project" name="Gradle: com.squareup.dagger:dagger-compiler:1.2.2" />
+        <element id="library" level="project" name="Gradle: com.squareup.dagger:dagger:1.2.2" />
+        <element id="library" level="project" name="Gradle: com.squareup:javawriter:2.5.0" />
+        <element id="library" level="project" name="Gradle: commons-io:commons-io:2.5" />
+        <element id="library" level="project" name="Gradle: de.jensd:fontawesomefx:8.9" />
+        <element id="library" level="project" name="Gradle: io.datafx:core:8.0.1" />
+        <element id="library" level="project" name="Gradle: io.datafx:datafx:8.0.1" />
+        <element id="library" level="project" name="Gradle: io.datafx:flow:8.0.1" />
+        <element id="library" level="project" name="Gradle: io.reactivex.rxjava2:rxjava:2.1.3" />
+        <element id="library" level="project" name="Gradle: io.reactivex.rxjava2:rxjavafx:2.2.0" />
+        <element id="library" level="project" name="Gradle: javax.inject:javax.inject:1" />
+        <element id="library" level="project" name="Gradle: junit:junit:4.12" />
+        <element id="library" level="project" name="Gradle: log4j:log4j:1.2.17" />
+        <element id="library" level="project" name="Gradle: org.hamcrest:hamcrest-core:1.3" />
+        <element id="library" level="project" name="Gradle: org.reactivestreams:reactive-streams:1.0.1" />
+      </element>
+    </root>
+  </artifact>
+</component>

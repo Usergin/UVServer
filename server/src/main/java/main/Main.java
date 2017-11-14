@@ -27,10 +27,6 @@ public class Main extends Application {
     @FXMLViewFlowContext
     @Inject
     ViewFlowContext viewFlowContext;
-    @Inject
-    Parser parser;
-    private final int MIN_WIDTH = 850;
-    private final int MIN_HEIGHT = 600;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -45,7 +41,6 @@ public class Main extends Application {
                 e.printStackTrace();
             }
         }).start();
-        LOG.info("Application started" + parser);
         viewFlowContext.register("stage", primaryStage);
 
         Flow flow = new Flow(ControlPanelController.class);

@@ -46,7 +46,7 @@ dependencies {
 idea.module.downloadJavadoc = true
 ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
 
-mainClassName = 'Main'
+mainClassName = 'main.Main'
 run {
     mainClassName = project.hasProperty("main") ? mainClass : 'src.main.java.Main'
 }

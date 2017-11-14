@@ -23,15 +23,14 @@ public class ClientThread extends Thread {
     private Socket clientSocket = null;
     private final ClientThread[] threads;
     private int maxClientsCount;
-    private String status;
     private InputStream sin;
     private OutputStream sout;
     private static final int TIMEOUT = 3000;
-
     // IP пользователя
     private String clientIp = "";
-    private DataInputStream inputStream = null;
-    private DataOutputStream outputStream = null;
+    private DataInputStream dataInputStream = null;
+    private DataOutputStream dataOutputStream = null;
+    private DatagramSocket datagramSocket = null;
 
     ClientThread(Socket clientSocket, ClientThread[] threads) {
         Injector.inject(this, Arrays.asList(new NetworkModule()));
@@ -49,77 +48,48 @@ public class ClientThread extends Thread {
         }
         // Конвертируем потоки в другой тип, чтоб легче обрабатывать
         // текстовые сообщения.
-        inputStream = new DataInputStream(sin);
-        outputStream = new DataOutputStream(sout);
+        dataInputStream = new DataInputStream(sin);
+        dataOutputStream = new DataOutputStream(sout);
         start();
     }
 
     public void run() {
         int maxClientsCount = this.maxClientsCount;
         ClientThread[] threads = this.threads;
-        Runnable run = new Runnable() {
-            public void run() {
 
-                try {
-                    byte[] message = new byte[10];
-                    DatagramPacket datagramPacket = new DatagramPacket(message, message.length);
-                    DatagramSocket datagramSocket = new DatagramSocket(null);
-                    datagramSocket.setReuseAddress(true);
-                    datagramSocket.setBroadcast(true);
-                    datagramSocket.bind(new InetSocketAddress(AppConstants.CLIENT_PORT));
 
-                    while (!ClientObserverThreadServer.isStopped()) {
-                        try {
+        Runnable run = () -> {
+            try {
+                byte[] message = new byte[10];
+                DatagramPacket datagramPacket = new DatagramPacket(message, message.length);
+                datagramSocket = new DatagramSocket(null);
+                datagramSocket.setReuseAddress(true);
+                datagramSocket.setBroadcast(true);
+                datagramSocket.bind(new InetSocketAddress(AppConstants.CLIENT_PORT));
+
+                while (!ClientObserverThreadServer.isStopped()) {
+                    try {
 //                            datagramSocket.setSoTimeout(TIMEOUT);
-                            datagramSocket.receive(datagramPacket);
-                            String text = new String(message, 0, datagramPacket.getLength());
-                            String command = text.substring(0, 2);
-                            System.out.println("command: " + command);
-                      // проверка скорости на 0
-                           if (text.substring(2, text.length()).equals(""))
-                                NYBus.get().post(new CommandMessage(clientIp, 0, command), Channel.SEVEN);
-                            else
-                                NYBus.get().post(new CommandMessage(clientIp, Integer.parseInt(text.substring(2, text.length())), command), Channel.SEVEN);
+                        datagramSocket.receive(datagramPacket);
+                        dispatcher.onClientDatagramMessageReceivedForDevice(this,datagramPacket);
+                        String text = new String(message, 0, datagramPacket.getLength());
+                        String command = text.substring(0, 2);
+                        System.out.println("command: " + command);
+                        NYBus.get().post(new CommandMessage(clientIp, Integer.parseInt(text.substring(2, text.length())), command), Channel.SEVEN);
 
-                            if (command.equalsIgnoreCase(AppConstants.FORWARD)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_UP, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.FORWARD_RIGHT)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_UPRIGHT, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.FORWARD_LEFT)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_UPLEFT, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.BACKWARD)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_DOWN, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.BACKWARD_RIGHT)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_DOWNRIGHT, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.BACKWARD_LEFT)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_DOWNLEFT, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.RIGHT)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_RIGHT, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.LEFT)) {
-                                int speed = Integer.parseInt(text.substring(2, text.length()));
-//                                handler.obtainMessage(CommandMessage.MESSAGE_LEFT, speed - 50).sendToTarget();
-                            } else if (command.equalsIgnoreCase(AppConstants.STOP)) {
-//                                handler.obtainMessage(CommandMessage.MESSAGE_STOP).sendToTarget();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    datagramSocket.close();
-                    System.out.println("Kill Task");
-                } catch (SocketException e) {
-                    e.printStackTrace();
                 }
+                datagramSocket.close();
+                System.out.println("Kill Task");
+            } catch (SocketException e) {
+                e.printStackTrace();
             }
         };
         new Thread(run).start();
+
+
         try {
             // IP пользователя
             clientIp = clientSocket.getInetAddress().getHostAddress();
@@ -128,63 +98,41 @@ public class ClientThread extends Thread {
             // Помещаем пользователя в список пользователей
             Dispatcher.addClientToHashMap(this, null);
             System.out.println("dispatcher client: " + dispatcher);
-
-            dispatcher.sendMessageAllClient("Подключен пользователь: "
-                    + clientIp);
             dispatcher.sendDeviceIpListToClient(this);
 
-//            outputStream.writeUTF("received"); // отсылаем введенную строку текста
+            int size = dataInputStream.readInt();
+            byte[] buf = new byte[size];
+            dataInputStream.readFully(buf);
+
+
+            final String clientSelectedIp = new String(buf);
+            System.out.println("selected ip by client: " + clientSelectedIp);
+
+            if (clientSelectedIp.startsWith(AppConstants.SELECTED_IP)) {
+                System.out.println("selected ip by client: " + clientSelectedIp.substring(4, clientSelectedIp.length()));
+                Dispatcher.addClientToHashMap(this, clientSelectedIp.substring(4, clientSelectedIp.length()));
+            }
+
+//            dataOutputStream.writeUTF("received"); // отсылаем введенную строку текста
 //            // серверу.
-//            outputStream.flush();
-            while (true) {
-                status = inputStream.readUTF();
-                if (status == null) {
-                    // Невозможно прочитать данные, пользователь отключился от
-                    // сервера
-                    close();
-                    // Останавливаем бесконечный цикл
-                    break;
-                } else if (!status.isEmpty()) {
-                    // Нотификация: получено сообщение
-                    System.out.println("status: " + String.valueOf(status));
-                    switch (String.valueOf(status)) {
-                        case "END":
-                            System.out.println("Get end : " + status);
-                            System.out.println("Client disconnected");
-                            System.out.println("Closing connections & channels.");
-                            inputStream.close();
-                            outputStream.close();
-                            close();
-                            break;
-                        case "IP":
-                            System.out.println("Get ip : " + status);
-                            System.out.println("Client choose device");
-                            Dispatcher.addClientToHashMap(this, status);
-                            break;
-                        default:
-                            System.out.println("this line ForDevice: " + status);
-//                            NYBus.get().post( Channel.THREE);
-                            dispatcher.onClientMessageReceivedForDevice(this, status);
-                            break;
-                    }
-                }
-                // outputStream.writeUTF("received"); // отсылаем введенную строку текста
-                // // серверу.
-                // outputStream.flush();
+//            dataOutputStream.flush();
+            while (!ClientObserverThreadServer.isStopped()) {
+//                String s = dataInputStream.readUTF();
+//                System.out.println("this line ForDevice: " + String.valueOf(s));
+                size = dataInputStream.readInt();
+                final byte[] buffer = new byte[size];
+                dataInputStream.readFully(buffer);
+                System.out.println("this line ForDevice: " + new String(buffer) + buffer.length);
+
+                dispatcher.sendMessageFromClientToDevice(this, buffer);
 
                 // -----check isStopped and send quit---------
                 if (ClientObserverThreadServer.isStopped()) {
                     System.out.println("quit");
-                    outputStream.writeUTF("quit");
-                    outputStream.flush();
+                    dataOutputStream.writeUTF("quit");
+                    dataOutputStream.flush();
                     close();
                 }
-                for (int i = 0; i < maxClientsCount; i++) {
-                    if (threads[i] != null && threads[i] != this) {
-                        threads[i].outputStream.writeUTF("*** A new client " + status);
-                    }
-                }
-
 				/*
                  * Clean up. Set the current thread variable to null so that a
 				 * new client could be accepted by the server.
@@ -208,12 +156,20 @@ public class ClientThread extends Thread {
         return clientIp;
     }
 
-    public DataOutputStream getOutputStream() {
-        return outputStream;
+    public DatagramSocket getDatagramSocket() {
+        return datagramSocket;
     }
 
-    public void setOutputStream(DataOutputStream outputStream) {
-        this.outputStream = outputStream;
+    public void setDatagramSocket(DatagramSocket datagramSocket) {
+        this.datagramSocket = datagramSocket;
+    }
+
+    public DataOutputStream getDataOutputStream() {
+        return dataOutputStream;
+    }
+
+    public void setDataOutputStream(DataOutputStream dataOutputStream) {
+        this.dataOutputStream = dataOutputStream;
     }
 
     private void close() {
@@ -223,8 +179,8 @@ public class ClientThread extends Thread {
             NYBus.get().post(new ConnectionState(AppConstants.CLIENT_TYPE, clientIp, false), Channel.THREE);
             // Удаляем пользователя со списка онлайн
             Dispatcher.removeClientFromHashMap(this);
-            inputStream.close();
-            outputStream.close();
+            dataInputStream.close();
+            dataOutputStream.close();
             clientSocket.close();
             if (clientSocket != null)
                 clientSocket.close();

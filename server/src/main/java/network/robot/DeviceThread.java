@@ -7,11 +7,12 @@ import dagger.Injector;
 import dagger.application.NetworkModule;
 import data.model.ConnectionState;
 import network.Dispatcher;
+import network.client.ClientObserverThreadServer;
 import utils.AppConstants;
 
 import javax.inject.Inject;
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
 import java.util.Arrays;
 
 /**
@@ -28,18 +29,16 @@ public class DeviceThread extends Thread {
     private OutputStream sout;
     // IP пользователя
     private String deviceIp = "";
-    private DataInputStream inputStream = null;
-    private DataOutputStream outputStream = null;
+    private DataInputStream dataInputStream = null;
+    private DataOutputStream dataOutputStream = null;
+    private DatagramSocket datagramSocket = null;
 
     DeviceThread(Socket deviceSocket, DeviceThread[] threads) {
         Injector.inject(this, Arrays.asList(new NetworkModule()));
         this.deviceSocket = deviceSocket;
         this.threads = threads;
         maxClientsCount = threads.length;
-//        dispatcher = Injector.inject();
-        // Берем входной и выходной потоки сокета, теперь можем
-        // получать и
-        // отсылать данные клиенту.
+
         try {
             sin = deviceSocket.getInputStream();
             sout = deviceSocket.getOutputStream();
@@ -48,65 +47,69 @@ public class DeviceThread extends Thread {
         }
         // Конвертируем потоки в другой тип, чтоб легче обрабатывать
         // текстовые сообщения.
-        inputStream = new DataInputStream(sin);
-        outputStream = new DataOutputStream(sout);
+        dataInputStream = new DataInputStream(sin);
+        dataOutputStream = new DataOutputStream(sout);
         start();
     }
 
     public void run() {
         int maxClientsCount = this.maxClientsCount;
         DeviceThread[] threads = this.threads;
+        Runnable run = () -> {
+            try {
+                byte[] message = new byte[10];
+                DatagramPacket datagramPacket = new DatagramPacket(message, message.length);
+                datagramSocket = new DatagramSocket(null);
+                datagramSocket.setReuseAddress(true);
+                datagramSocket.setBroadcast(true);
+                datagramSocket.bind(new InetSocketAddress(AppConstants.DEVICE_PORT));
+
+                while (!ClientObserverThreadServer.isStopped()) {
+                    try {
+//                            datagramSocket.setSoTimeout(TIMEOUT);
+                        datagramSocket.receive(datagramPacket);
+                        String text = new String(message, 0, datagramPacket.getLength());
+                        System.out.println("command: " + text);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                datagramSocket.close();
+                System.out.println("Kill Task");
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+        };
+        new Thread(run).start();
+
+
         try {
             // IP пользователя
             deviceIp = deviceSocket.getInetAddress().getHostAddress();
             // Нотификация о подключении нового пользователя
             NYBus.get().post(new ConnectionState(AppConstants.DEVICE_TYPE, deviceIp, true), Channel.THREE);
-//			multiDeviceServer.onDeviceConnected(this);
             // Помещаем пользователя в список пользователей
             Dispatcher.addDeviceToHashMap(this);
-            System.out
-                    .println("dispatcher..." + dispatcher);
-            dispatcher.sendMessageAllClient("Подключено устройство: "
-                    + deviceIp);
-            // Отправляем всем сообщение
-//			multiDeviceServer.sendMessageDevice(null,
-//					"Подключено исполнительное устройство: " + deviceIp);
-            while (true) {
-                String status = inputStream.readUTF();
-                if (status == null) {
-                    // Невозможно прочитать данные, пользователь отключился от
-                    // сервера
-                    close();
-                    // Останавливаем бесконечный цикл
-                    break;
-                } else if (!status.isEmpty()) {
-                    // Нотификация: получено сообщение
-                    if (String.valueOf(status).equals("END")) {
-                        System.out.println("Get end : " + status);
-                        System.out.println("Device disconnected");
-                        System.out.println("Closing connections & channels.");
-                        inputStream.close();
-                        outputStream.close();
-                        close();
-                    } else {
-                        dispatcher.onDeviceMessageReceivedForClient(
-                                this, status);
-                        System.out
-                                .println("Sending this line to the server...");
-                    }
-                }
+
+            while (!DeviceObserverThreadServer.isStopped()) {
+
+                int size = dataInputStream.readInt();
+
+                final byte[] buffer = new byte[size];
+                dataInputStream.readFully(buffer);
+
+                dispatcher.sendMessageDeviceToClient(
+                        this, buffer);
+                System.out
+                        .println("Sending this line to the server..." +String.valueOf(buffer)+ buffer.length);
 
                 // -----check isStopped and send quit---------
                 if (DeviceObserverThreadServer.isStopped()) {
                     System.out.println("quit");
-                    outputStream.writeUTF("quit");
-                    outputStream.flush();
+                    dataOutputStream.writeUTF("quit");
+                    dataOutputStream.flush();
                     close();
-                }
-                for (int i = 0; i < maxClientsCount; i++) {
-                    if (threads[i] != null && threads[i] != this) {
-                        threads[i].outputStream.writeUTF("A new device");
-                    }
                 }
 
 				/*
@@ -127,12 +130,20 @@ public class DeviceThread extends Thread {
         }
     }
 
-    public DataOutputStream getOutputStream() {
-        return outputStream;
+    public DataOutputStream getDataOutputStream() {
+        return dataOutputStream;
     }
 
-    public void setOutputStream(DataOutputStream outputStream) {
-        this.outputStream = outputStream;
+    public void setDataOutputStream(DataOutputStream dataOutputStream) {
+        this.dataOutputStream = dataOutputStream;
+    }
+
+    public DatagramSocket getDatagramSocket() {
+        return datagramSocket;
+    }
+
+    public void setDatagramSocket(DatagramSocket datagramSocket) {
+        this.datagramSocket = datagramSocket;
     }
 
     public String getDeviceIp() {
@@ -148,8 +159,8 @@ public class DeviceThread extends Thread {
             // Отправляем всем сообщение
             Dispatcher.removeDeviceFromHashMap(this);
 
-            inputStream.close();
-            outputStream.close();
+            dataInputStream.close();
+            dataOutputStream.close();
             deviceSocket.close();
             if (deviceSocket != null)
                 deviceSocket.close();
