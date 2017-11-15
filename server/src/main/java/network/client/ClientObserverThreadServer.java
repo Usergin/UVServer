@@ -104,13 +104,13 @@ public class ClientObserverThreadServer implements Runnable{
 
     /******************** методы интерфейса ServerListener *******************/
 
-    public void serverForClientStarted(String ip, int port) {
+    private void serverForClientStarted(String ip, int port) {
         synchronized (lock) {
             NYBus.get().post(new ClientServerState(ip, port, true), Channel.TWO);
         }
     }
 
-    public void serverForClientStopped() {
+    private void serverForClientStopped() {
         synchronized (lock) {
             NYBus.get().post(new ClientServerState(null, -1, false), Channel.TWO);
         }

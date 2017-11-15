@@ -24,7 +24,7 @@ public class DeviceThread extends Thread {
     Dispatcher dispatcher;
     private Socket deviceSocket = null;
     private final DeviceThread[] threads;
-    private int maxClientsCount;
+    private final int maxClientsCount;
     private InputStream sin;
     private OutputStream sout;
     // IP пользователя
@@ -102,8 +102,12 @@ public class DeviceThread extends Thread {
                 dispatcher.sendMessageDeviceToClient(
                         this, buffer);
                 System.out
-                        .println("Sending this line to the server..." +String.valueOf(buffer)+ buffer.length);
+                        .println("Sending this line to the server..." +String.valueOf(buffer)+ " " + buffer.length);
 
+//                if (clientSelectedIp.startsWith(AppConstants.)) {
+//                    System.out.println("selected ip by client: " + clientSelectedIp.substring(4, clientSelectedIp.length()));
+//                    Dispatcher.addClientToHashMap(this, clientSelectedIp.substring(4, clientSelectedIp.length()));
+//                }
                 // -----check isStopped and send quit---------
                 if (DeviceObserverThreadServer.isStopped()) {
                     System.out.println("quit");

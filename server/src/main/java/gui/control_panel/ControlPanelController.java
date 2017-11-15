@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.controls.JFXToggleButton;
 import com.jfoenix.controls.JFXTreeTableView;
 import dagger.Injector;
+import dagger.application.AppModule;
 import dagger.application.ControlPanelModule;
 import io.datafx.controller.ViewController;
 import io.datafx.controller.ViewNode;
@@ -50,31 +51,12 @@ public class ControlPanelController implements ControlPanelView {
     private static final String EM1 = "1em";
 
     private static final Logger LOG = Logger.getLogger(ControlPanelController.class);
-    private StringProperty username = new SimpleStringProperty();
-    private StringProperty password = new SimpleStringProperty();
-    BooleanBinding booleanBind = Bindings.or(username.isEmpty(),
-            password.isEmpty());
 
     @PostConstruct
     public void init() throws Exception {
         Injector.inject(this, Arrays.asList(new ControlPanelModule()));
         System.out.println("init " + controlPanelPresenter);
         controlPanelPresenter.setControlPanelView(this);
-
-//        txtUsername.focusedProperty().addListener((o, oldVal, newVal) -> {
-//            if (!newVal) {
-//                txtUsername.validate();
-//            }
-//        });
-//        txtPassword.focusedProperty().addListener((o, oldVal, newVal) -> {
-//            if (!newVal) {
-//                txtPassword.validate();
-//            }
-//        });
-//        imgProgress.setVisible(false);
-//        btnLogin.disableProperty().bind(booleanBind);
-//        username.bind(txtUsername.textProperty());
-//        password.bind(txtPassword.textProperty());
     }
 
 
@@ -131,9 +113,7 @@ public class ControlPanelController implements ControlPanelView {
 
     @Override
     public void addCommandToList(String str) {
-        System.out.println("Controller message: " + str);
-
-        Platform.runLater(() -> {
+       Platform.runLater(() -> {
             listCommand.getItems().add(str);
             int lastElement = listCommand.getItems().size()-1;
             listCommand.getSelectionModel().select(lastElement);

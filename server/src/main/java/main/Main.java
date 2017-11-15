@@ -27,6 +27,8 @@ public class Main extends Application {
     @FXMLViewFlowContext
     @Inject
     ViewFlowContext viewFlowContext;
+    @Inject
+    Parser parser;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -60,6 +62,7 @@ public class Main extends Application {
                 ControlPanelController.class.getResource("/css/control_panel.css").toExternalForm());
 
         primaryStage.setScene(scene);
+//        primaryStage.setOnCloseRequest(e -> controller.shutdown());
         primaryStage.show();
     }
 

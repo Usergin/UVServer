@@ -22,7 +22,7 @@ public class ClientThread extends Thread {
     Dispatcher dispatcher;
     private Socket clientSocket = null;
     private final ClientThread[] threads;
-    private int maxClientsCount;
+    private final int maxClientsCount;
     private InputStream sin;
     private OutputStream sout;
     private static final int TIMEOUT = 3000;
@@ -106,19 +106,15 @@ public class ClientThread extends Thread {
 
 
             final String clientSelectedIp = new String(buf);
-            System.out.println("selected ip by client: " + clientSelectedIp);
+            System.out.println("buffer: " + clientSelectedIp);
 
             if (clientSelectedIp.startsWith(AppConstants.SELECTED_IP)) {
                 System.out.println("selected ip by client: " + clientSelectedIp.substring(4, clientSelectedIp.length()));
                 Dispatcher.addClientToHashMap(this, clientSelectedIp.substring(4, clientSelectedIp.length()));
             }
 
-//            dataOutputStream.writeUTF("received"); // отсылаем введенную строку текста
-//            // серверу.
-//            dataOutputStream.flush();
             while (!ClientObserverThreadServer.isStopped()) {
-//                String s = dataInputStream.readUTF();
-//                System.out.println("this line ForDevice: " + String.valueOf(s));
+
                 size = dataInputStream.readInt();
                 final byte[] buffer = new byte[size];
                 dataInputStream.readFully(buffer);
@@ -146,7 +142,8 @@ public class ClientThread extends Thread {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            Dispatcher.removeClientFromHashMap(this);
+            dispatcher.onStopVideoReceivedForDevice(this);
+//            Dispatcher.removeClientFromHashMap(this);
             NYBus.get().post(new ConnectionState(AppConstants.CLIENT_TYPE, clientIp, false), Channel.THREE);
 
         }

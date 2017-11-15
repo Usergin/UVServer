@@ -26,14 +26,18 @@ public class ControlPanelInteractorImpl implements ControlPanelInteractor, Devic
     public void startDeviceServer() {
         deviceObserverThreadServer = new DeviceObserverThreadServer();
         deviceObserverThreadServer.setFalseStopped();
-        new Thread(deviceObserverThreadServer).start();
+        Thread thread = new Thread(deviceObserverThreadServer);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     @Override
     public void startClientServer() {
         clientObserverThreadServer = new ClientObserverThreadServer();
         clientObserverThreadServer.setFalseStopped();
-        new Thread(clientObserverThreadServer).start();
+        Thread thread = new Thread(clientObserverThreadServer);
+        thread.setDaemon(true);
+        thread.start();
 //        Task<Void> sleeper = new Task<Void>() {
 //            @Override
 //            protected Void call() throws Exception {

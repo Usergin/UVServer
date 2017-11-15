@@ -16,6 +16,8 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class Dispatcher {
     @Inject
@@ -24,13 +26,13 @@ public class Dispatcher {
     private static final Object lock = new Object();
     // Client
     // Хранит список пользователей
-    private static LinkedHashMap<ClientThread, DeviceThread> clientList = new LinkedHashMap<ClientThread, DeviceThread>();
+    private static LinkedHashMap<ClientThread, DeviceThread> clientList = new LinkedHashMap<>();
 //    // Хранит слушателей сервера
 //    private static LinkedList<ClientListener> listenerList = new LinkedList<ClientListener>();
 
     // Device
     // Хранит онлайн устройства
-    private static LinkedHashMap<String, DeviceThread> deviceThreadList = new LinkedHashMap<String, DeviceThread>();
+    private static LinkedHashMap<String, DeviceThread> deviceThreadList = new LinkedHashMap<>();
     //    // Хранит слушателей сервера
 //    private static LinkedList<DeviceListener> listenerList = new LinkedList<DeviceListener>();
     private String TAG = Dispatcher.class.getCanonicalName();
@@ -120,6 +122,7 @@ public class Dispatcher {
             user.getDataOutputStream().write(msg.getBytes());
             user.getDataOutputStream().flush();
         } catch (Exception ex) {
+            clientList.remove(user);
             ex.printStackTrace();
         }
     }
@@ -127,7 +130,7 @@ public class Dispatcher {
     // ***************** отправка сообщения от устройства определенным пользователям ****************/
     @Subscribe(channelId = Channel.FIVE)
     public void sendMessageDeviceToClient(DeviceThread deviceThread, byte[] message) {
-        System.out.println("sendMessageDeviceToClient in clientobserver " + message);
+        System.out.println("sendMessageDeviceToClient in clientobserver " + message + clientList.size());
         for (ClientThread clientThread : clientList.keySet()) {
             if (deviceThread.equals(clientList.get(clientThread))) {
                 try {
@@ -136,6 +139,7 @@ public class Dispatcher {
                     clientThread.getDataOutputStream().write(message);
                     clientThread.getDataOutputStream().flush();
                 } catch (IOException e) {
+                    clientList.remove(clientThread);
                     e.printStackTrace();
                 }
             }
@@ -156,6 +160,7 @@ public class Dispatcher {
                 deviceThread.getDataOutputStream().write(message);
                 deviceThread.getDataOutputStream().flush();
             } catch (Exception ex) {
+                clientList.remove(deviceThread);
                 ex.printStackTrace();
             }
         }
@@ -179,6 +184,31 @@ public class Dispatcher {
         }
     }
 
+
+    public void onStopVideoReceivedForDevice(ClientThread user) {
+        DeviceThread deviceThread = clientList.get(user);
+        System.out.println("onStartVideoReceivedForDevice1: " + deviceThread.getDeviceIp());
+        if (deviceThread != null) {
+            int count = 0;
+            for (Map.Entry<ClientThread, DeviceThread> entry : clientList.entrySet())
+                if (Objects.equals(entry.getValue().getDeviceIp(), deviceThread.getDeviceIp()))
+                    count++;
+
+            System.out.println("onStartVideoReceivedForDevice count: " + count);
+            if (count <= 1) {
+                try {
+                    deviceThread.getDataOutputStream().writeInt(AppConstants.STOP_PREVIEW.length());
+                    deviceThread.getDataOutputStream().write(AppConstants.STOP_PREVIEW.getBytes());
+                    deviceThread.getDataOutputStream().flush();
+                    System.out.println("onStartVideoReceivedForDevice count flush ");
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        removeClientFromHashMap(user);
+    }
 //    @Subscribe(channelId = Channel.THREE)
 //    public void onChangeStateOfConnection(ConnectionState user, String message) {
 //        DeviceThread deviceThread = clientList.get(user);

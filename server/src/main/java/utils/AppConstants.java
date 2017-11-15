@@ -27,6 +27,7 @@ public class AppConstants {
 	final public static String PATH_TO_LOG_FILE = "/SecLogFile.txt";
 
 	public static final String ACCEPT_CONNECTION = "ACCEPT";
+	public static final String STOP_PREVIEW = "STP_PRVW";
 	public static final String WRONG_PASSWORD = "WRONG";
 	public static final String LED_ON = "LEDON";
 	public static final String LED_OFF = "LEDOFF";

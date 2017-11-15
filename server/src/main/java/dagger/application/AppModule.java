@@ -21,9 +21,9 @@ public class AppModule {
         return new ViewFlowContext();
     }
 
-//    @Provides
-//    Parser provideParser() {
-//        return new Parser();
-//    }
+    @Provides
+    Parser provideParser() {
+        return new Parser();
+    }
 
 }
