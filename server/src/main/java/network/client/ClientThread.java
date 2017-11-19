@@ -75,7 +75,7 @@ public class ClientThread extends Thread {
                         String text = new String(message, 0, datagramPacket.getLength());
                         String command = text.substring(0, 2);
                         System.out.println("command: " + command);
-                        NYBus.get().post(new CommandMessage(clientIp, Integer.parseInt(text.substring(2, text.length())), command), Channel.SEVEN);
+                        NYBus.get().post(new CommandMessage(clientIp, Integer.parseInt(text.substring(3, text.length())), command), Channel.SEVEN);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -118,7 +118,7 @@ public class ClientThread extends Thread {
                 size = dataInputStream.readInt();
                 final byte[] buffer = new byte[size];
                 dataInputStream.readFully(buffer);
-                System.out.println("this line ForDevice: " + new String(buffer) + buffer.length);
+//                System.out.println("this line ForDevice: " + new String(buffer) + buffer.length);
 
                 dispatcher.sendMessageFromClientToDevice(this, buffer);
 

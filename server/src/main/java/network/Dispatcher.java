@@ -56,8 +56,8 @@ public class Dispatcher {
     public static void removeDeviceFromHashMap(DeviceThread deviceThread) {
         synchronized (lock) {
             System.out.println("removeDeviceFromHashMap" + deviceThread.getDeviceIp());
-            if (deviceThreadList.containsValue(deviceThread))
-                deviceThreadList.remove(deviceThread);
+            if (deviceThreadList.containsKey(deviceThread.getDeviceIp()))
+                deviceThreadList.remove(deviceThread.getDeviceIp());
         }
     }
 
